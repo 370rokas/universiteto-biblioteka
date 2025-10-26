@@ -1,0 +1,9 @@
+{
+	"recommendations": [
+		"llvm-vs-code-extensions.vscode-clangd", // Clangd
+		"xaver.clang-format", // Clang-Format
+		"ms-vscode.cmake-tools", // CMake Tools
+		"cheshirekow.cmake-format", // CMake Format
+		"webfreak.debug", // Debugging
+	],
+}
