@@ -6,6 +6,8 @@
 int main() {
 	config::load("config.json");
 
+	logger::get()->info("Starting backend...");
+
 	Database db(config::get()["databaseUrl"]);
 
 	while (true) {

@@ -32,9 +32,15 @@ find_package(libpqxx REQUIRED)
 
 ## Logginimas
 find_package(spdlog REQUIRED)
-
 ## JSON
 find_package(nlohmann_json REQUIRED)
+
+## bCrypt password hashinimas
+FetchContent_Declare(bcrypt
+    GIT_REPOSITORY https://github.com/hilch/Bcrypt.cpp.git
+    GIT_TAG master
+)
+FetchContent_MakeAvailable(bcrypt)
 
 ### Biblioteku linkinimas
 target_link_libraries(ub-backend
@@ -46,4 +52,5 @@ target_link_libraries(ub-backend
     pqxx
     spdlog::spdlog
     nlohmann_json::nlohmann_json
+    bcrypt
 )

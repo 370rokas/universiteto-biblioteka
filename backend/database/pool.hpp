@@ -71,13 +71,25 @@ template <size_t N> class ConnectionPool {
 					    create_connection(conn_idx == 0));
 					break;
 				} catch (const pqxx::broken_connection &e) {
+					logger::get()->error(
+					    "Nepavyko prisijungti prie duomenų "
+					    "bazės (bandymas {}/{}): {}",
+					    attempt + 1, retries, e.what());
+					
+					std::this_thread::sleep_for(
+					    std::chrono::seconds(3));
+
 					if (attempt == retries - 1)
 						++failed;
+					
 					continue;
 				}
 			}
 		}
 		if (failed == connections) {
+			logger::get()->error(
+			    "Nepavyko prisijungti prie duomenų bazės. "
+			    "Išeinama iš programos.");
 			exit(-1);
 		}
 	}
