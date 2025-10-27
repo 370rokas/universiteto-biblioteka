@@ -1,8 +1,41 @@
+#ifndef DB_MODELIS_HPP
+#define DB_MODELIS_HPP
+
+#include <string_view>
+
+inline constexpr std::string_view DB_MODELIS = R"sql(
 -- Tipai
-CREATE TYPE var_role AS ENUM ('administratorius', 'vartotojas');
-CREATE TYPE egz_bukle as ENUM ('nauja', 'gera', 'prasta');
-CREATE TYPE egz_statusas AS ENUM ('skolinama', 'laisva', 'rezervuota');
-CREATE TYPE rez_statusas AS ENUM ('laukiama', 'pranesta', 'ivykdyta');
+DO $$
+BEGIN
+    CREATE TYPE var_role AS ENUM ('administratorius', 'vartotojas');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END
+$$;
+
+DO $$
+BEGIN
+    CREATE TYPE egz_bukle AS ENUM ('nauja', 'gera', 'prasta');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END
+$$;
+
+DO $$
+BEGIN
+    CREATE TYPE egz_statusas AS ENUM ('skolinama', 'laisva', 'rezervuota');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END
+$$;
+
+DO $$
+BEGIN
+    CREATE TYPE rez_statusas AS ENUM ('laukiama', 'pranesta', 'ivykdyta');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END
+$$;
 
 -- Lentelės
 CREATE TABLE IF NOT EXISTS pareigos (
@@ -27,29 +60,16 @@ CREATE TABLE IF NOT EXISTS knyga (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     isbn VARCHAR(20) UNIQUE NOT NULL,
-    pavadinimas VARCHAR(100) NOT NULL,
+    pavadinimas TEXT NOT NULL,
     autoriai jsonb NOT NULL,
     
-    zanras VARCHAR(50),
-    leidykla VARCHAR(100),
+    zanras TEXT,
+    leidykla TEXT,
     leidimo_metai DATE,
 
     kaina NUMERIC(10, 2),
 
     paieskosVektorius tsvector
-);
-
-CREATE TABLE IF NOT EXISTS nuoma (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-    vartotojo_id UUID REFERENCES vartotojai(id) ON DELETE CASCADE,
-    egzemplioriaus_id UUID REFERENCES egzempliorius(id) ON DELETE SET NULL,
-
-    nuoma_nuo DATE NOT NULL DEFAULT CURRENT_DATE,
-    nuoma_iki DATE NOT NULL DEFAULT apskaiciuoti_grazinimo_data(vartotojo_id, nuoma_nuo), 
-    grazinimo_laikas timestamptz NULL,
-
-    skolos_id UUID REFERENCES skola(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS egzempliorius (
@@ -66,12 +86,22 @@ CREATE TABLE IF NOT EXISTS skola (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     vartotojo_id UUID REFERENCES vartotojai(id) ON DELETE CASCADE,
-    nuomos_id UUID REFERENCES nuoma(id) ON DELETE CASCADE,
 
     suma NUMERIC(10, 2) CHECK (suma >= 0),
-    sumoketa BOOLEAN NOT NULL DEFAULT FALSE,
+    sumoketa BOOLEAN NOT NULL DEFAULT FALSE
+);
 
-    UNIQUE (vartotojo_id, nuomos_id)
+CREATE TABLE IF NOT EXISTS nuoma (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    vartotojo_id UUID REFERENCES vartotojai(id) ON DELETE CASCADE,
+    egzemplioriaus_id UUID REFERENCES egzempliorius(id) ON DELETE SET NULL,
+
+    nuoma_nuo DATE NOT NULL DEFAULT CURRENT_DATE,
+    nuoma_iki DATE NOT NULL, 
+    grazinimo_laikas timestamptz NULL,
+
+    skolos_id UUID REFERENCES skola(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS rezervacija (
@@ -106,7 +136,7 @@ CREATE INDEX IF NOT EXISTS idx_knyga_leidimo_metai ON knyga(leidimo_metai);
 
 --- Skolu paieskai
 CREATE INDEX IF NOT EXISTS idx_skola_vartotojo ON skola(vartotojo_id);
-CREATE INDEX IF NOT EXISTS idx_skola_nuomos ON skola(nuomos_id);
+CREATE INDEX IF NOT EXISTS idx_nuoma_skolos ON nuoma(skolos_id);
 
 -- Funkcijos ir trigeriai
 
@@ -121,10 +151,32 @@ BEGIN
     FROM vartotojai v
     JOIN pareigos p ON v.pareigos = p.pavadinimas
     WHERE v.id = vartotojo_id;
+
+    IF skolinimo_terminas IS NULL THEN
+        RAISE EXCEPTION 'Nepavyko rasti skolinimo termino vartotojui %', vartotojo_id;
+    END IF;
+
     grazinimo_data := paskolinimo_data + skolinimo_terminas;
     RETURN grazinimo_data;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION trg_nustatyti_nuomos_grazinimo_data()
+RETURNS trigger AS $$
+BEGIN
+    -- Jei nuoma_iki nenurodyta – apskaičiuojame pagal vartotojo pareigas
+    IF NEW.nuoma_iki IS NULL THEN
+        NEW.nuoma_iki := apskaiciuoti_grazinimo_data(NEW.vartotojo_id, NEW.nuoma_nuo);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS nustatyti_nuomos_grazinimo_data ON nuoma;
+CREATE TRIGGER nustatyti_nuomos_grazinimo_data
+BEFORE INSERT ON nuoma
+FOR EACH ROW
+EXECUTE FUNCTION trg_nustatyti_nuomos_grazinimo_data();
 
 --- Atnaujinti knygos paieskos vektoriu (svarbumo eiga pavadinimas -> autoriai)
 CREATE OR REPLACE FUNCTION knygos_paieskos_vektoriaus_atnaujinimas()
@@ -141,3 +193,6 @@ $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS trg_knyga_tsv ON knyga;
 CREATE TRIGGER trg_knyga_tsv BEFORE INSERT OR UPDATE ON knyga
 FOR EACH ROW EXECUTE FUNCTION knygos_paieskos_vektoriaus_atnaujinimas();
+)sql";
+
+#endif // DB_MODELIS_HPP

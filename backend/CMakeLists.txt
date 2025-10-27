@@ -1,5 +1,15 @@
 add_executable(ub-backend
     main.cpp
+
+    database/db.cpp
+    database/queries.cpp
+
+    utils/config.cpp
+)
+
+target_include_directories(ub-backend
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 ### Bibliotekos
@@ -20,12 +30,20 @@ FetchContent_MakeAvailable(Crow)
 ## PostgreSQL klientas
 find_package(libpqxx REQUIRED)
 
+## Logginimas
+find_package(spdlog REQUIRED)
+
+## JSON
+find_package(nlohmann_json REQUIRED)
+
 ### Biblioteku linkinimas
-target_link_libraries(ub-frontend
+target_link_libraries(ub-backend
     PRIVATE
     OpenSSL::SSL
     OpenSSL::Crypto
     ZLIB::ZLIB
     Crow::Crow
     pqxx
+    spdlog::spdlog
+    nlohmann_json::nlohmann_json
 )

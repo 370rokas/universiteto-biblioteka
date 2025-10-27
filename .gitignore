@@ -1,4 +1,9 @@
 # Build failai
 build/
 .cache/
+bin/
 
+books_xml/
+books_xml.zip
+.env
+config.json
