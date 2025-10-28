@@ -1,6 +1,8 @@
 add_executable(ub-backend
     main.cpp
 
+    api/api.cpp
+
     database/db.cpp
     database/queries.cpp
 
@@ -42,6 +44,15 @@ FetchContent_Declare(bcrypt
 )
 FetchContent_MakeAvailable(bcrypt)
 
+## JWT sesiju tokenam
+include(FetchContent)
+fetchcontent_declare(jwt-cpp 
+    GIT_REPOSITORY https://github.com/Thalhammer/jwt-cpp.git
+    GIT_TAG v0.7.1
+)
+set(JWT_BUILD_EXAMPLES OFF CACHE BOOL "disable building examples" FORCE)
+fetchcontent_makeavailable(jwt-cpp)
+
 ### Biblioteku linkinimas
 target_link_libraries(ub-backend
     PRIVATE
@@ -51,6 +62,7 @@ target_link_libraries(ub-backend
     Crow::Crow
     pqxx
     spdlog::spdlog
+    jwt-cpp::jwt-cpp
     nlohmann_json::nlohmann_json
     bcrypt
 )

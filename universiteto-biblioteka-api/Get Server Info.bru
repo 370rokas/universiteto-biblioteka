@@ -1,0 +1,23 @@
+meta {
+  name: Get Server Info
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/
+  body: none
+  auth: none
+}
+
+tests {
+  test("Response should return the servers name", function() {
+    const data = res.getBody();
+    expect(data.serverName).to.be.a("string");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

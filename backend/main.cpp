@@ -1,25 +1,39 @@
+#include "api/api.hpp"
 #include "database/db.hpp"
 #include "utils/config.hpp"
 
-#include <iostream>
+#include <atomic>
+#include <csignal>
+
+std::atomic<bool> running(true);
+
+void signaluHandleris(int signal) {
+	logger::get()->info("Gautas signalas {}. Išjungiama...", signal);
+	running = false;
+}
 
 int main() {
 	config::load("config.json");
 
-	logger::get()->info("Starting backend...");
+	// Setupinam signalu handlerius
+	std::signal(SIGINT, signaluHandleris);
+	std::signal(SIGTERM, signaluHandleris);
 
+	// Paleidziam DB ir API
 	Database db(config::get()["databaseUrl"]);
+	WebApi api(1122, &db);
+	api.run();
 
-	while (true) {
-		std::string q;
-		std::cin >> q;
-		auto books = db.searchBooks(q);
-		for (const auto &book : books) {
-			std::cout << book.pavadinimas << " by " << book.autoriai
-				  << " (ISBN: " << book.isbn << ")\n";
+	while (running) {
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+
+		if (!api.isRunning()) {
+			logger::get()->warn("API nustojo veikti. Išjungiama.");
+			running = false;
 		}
-		std::cout << "-----------------------------------\n";
 	}
+
+	api.stop();
 
 	return 0;
 }

@@ -17,4 +17,13 @@ struct Knyga {
 	double kaina;
 };
 
+struct Vartotojas {
+	std::string id;
+	std::string username;
+	std::string password_hash;
+
+	std::string role;
+	std::string pareigos;
+};
+
 #endif // UB_BACKEND_DATABASE_TYPES_HPP

@@ -1,3 +1,8 @@
 {
-  "databaseUrl": ""
+  "databaseUrl": "",
+  "apiPort": 2233,
+
+  "jwtSecret": "openssl rand -base64 32",
+
+  "serverName": "Test Biblioteka"
 }

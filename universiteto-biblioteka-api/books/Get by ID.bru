@@ -1,0 +1,20 @@
+meta {
+  name: Get by ID
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/books/:bookId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  bookId: 98d0431a-9313-4237-91d7-54eeb69a552e
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

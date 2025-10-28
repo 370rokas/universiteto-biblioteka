@@ -1,0 +1,20 @@
+meta {
+  name: Search
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/books/search?q=harry po
+  body: none
+  auth: inherit
+}
+
+params:query {
+  q: harry po
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

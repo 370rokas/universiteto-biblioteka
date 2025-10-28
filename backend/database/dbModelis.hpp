@@ -45,13 +45,20 @@ CREATE TABLE IF NOT EXISTS pareigos (
     skolosDaugilkis NUMERIC(10, 2) NOT NULL
 );
 
+INSERT INTO pareigos (pavadinimas, skolinimoTerminas, skolosDaugilkis)
+VALUES
+    ('studentas', 30, 1.0),
+    ('destytojas', 60, 0.5),
+    ('administracija', 365, 0.0)
+ON CONFLICT (pavadinimas) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS vartotojai (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    username VARCHAR(50) UNIQUE NOT NULL,
+    username VARCHAR(20) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
 
     role var_role NOT NULL DEFAULT 'vartotojas',
-    pareigos VARCHAR(50) REFERENCES pareigos(pavadinimas) ON DELETE SET NULL,
+    pareigos VARCHAR(50) REFERENCES pareigos(pavadinimas) ON DELETE SET NULL DEFAULT 'studentas',
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
