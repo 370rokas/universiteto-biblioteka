@@ -1,0 +1,100 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { api, Book } from "@/lib/api";
+
+export default function BookDetail() {
+  const router = useRouter();
+  const { id } = useParams(); // expects /books/[id]
+  const [book, setBook] = useState<Book | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+
+    setLoading(true);
+    setError(null);
+
+    api
+      .getBookById(id)
+      .then((data) => {
+        if (data.ok && data.book) {
+          // Parse authors JSON
+          try {
+            data.book.autoriai = JSON.parse(
+              data.book.autoriai
+            ) as unknown as string[];
+          } catch {
+            // leave as string if parsing fails
+          }
+          setBook(data.book);
+        } else {
+          setError(data.message || "Knyga nerasta");
+        }
+      })
+      .catch((err) => setError(err.message || "Klaida gaunant knygos duomenis"))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-[var(--muted-foreground)]">
+        Kraunama...
+      </div>
+    );
+  }
+
+  if (error || !book) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-[var(--destructive)]">
+        {error || "Knyga nerasta"}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center bg-[var(--background)] min-h-screen p-6">
+      <button
+        className="mb-4 px-4 py-2 bg-[var(--secondary)] text-[var(--secondary-foreground)] rounded hover:bg-[var(--accent)]"
+        onClick={() => router.back()}
+      >
+        &larr; Atgal
+      </button>
+
+      <Card className="w-full max-w-2xl bg-[var(--card)] text-[var(--card-foreground)] shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            {book.pavadinimas}
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="flex flex-col gap-2 text-[var(--foreground)]">
+          <p>
+            <strong>Autoriai:</strong>{" "}
+            {Array.isArray(book.autoriai)
+              ? (book.autoriai as string[]).join(", ")
+              : book.autoriai}
+          </p>
+          <p>
+            <strong>Leidykla:</strong> {book.leidykla}
+          </p>
+          <p>
+            <strong>ISBN:</strong> {book.isbn}
+          </p>
+          <p>
+            <strong>Žanras:</strong> {book.zanras}
+          </p>
+          <p>
+            <strong>Leidimo metai:</strong> {book.leidimo_metai}
+          </p>
+          <p>
+            <strong>Kaina:</strong> {book.kaina} €
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

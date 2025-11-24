@@ -42,10 +42,7 @@ Dar svarbu kad būtų įdiegtas autentifikacijos mechanizmas:
 
 ### Frontend
 
-Konsolės vartotojo sąsaja. Palaiko visas kompiuterių OS.
-
-- UI - [FTXUI](https://github.com/ArthurSonzogni/FTXUI)
-- HTTP requestams - [CPR](https://github.com/libcpr/cpr)
+Web vartotojo sąsaja.
 
 ### Backend
 
@@ -56,21 +53,14 @@ Bibliotekos sistemo serveris. Palaiko Linux sistemas, galima paleisti ant Window
 - Duombazė - PostgreSQL
 - Konteinerizacija - Docker
 
-### apiWrapper
-
-C++ biblioteka darbui su Bibliotekos backend'o HTTP endpoint'ais. Galima naudoti kurti naujoms vartotojo sąsajoms. Galima sukurti bind'us į kitas kalbas.
-
-- HTTP requestams - [CPR](https://github.com/libcpr/cpr)
-
-
 ### Dokumentacija
 
 - API dokumentavimui - [Bruno](https://www.usebruno.com/)
 
 ## Serverio Konfiguracija:
 
-Nukopijuoti ``example-config.json`` ir jį pervadinti į ``config.json``. Visas reikšmes užpildyti pagal pavyzdį. Papildoma informacija apie reikšmių konfiguravimą:
+Nukopijuoti `example-config.json` ir jį pervadinti į `config.json`. Visas reikšmes užpildyti pagal pavyzdį. Papildoma informacija apie reikšmių konfiguravimą:
+
 ```
 jwtSecret: sugeneruoti su `openssl rand -base64 32`
 ```
-
