@@ -22,4 +22,5 @@ target_link_libraries(ub-frontend
     ftxui::dom
     ftxui::component
     cpr::cpr
+    ub-library
 )

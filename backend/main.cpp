@@ -21,7 +21,7 @@ int main() {
 
 	// Paleidziam DB ir API
 	Database db(config::get()["databaseUrl"]);
-	WebApi api(1122, &db);
+	WebApi api(config::get()["apiPort"], &db);
 	api.run();
 
 	while (running) {
