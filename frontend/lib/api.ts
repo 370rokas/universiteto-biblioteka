@@ -40,6 +40,14 @@ export interface Book {
   kaina: number;
 }
 
+export interface Egzempliorius {
+  id: string;
+  knygos_id: string;
+  statusas: string;
+  bukle: string;
+  isigyta: string;
+}
+
 export interface GetServerInfoResponse {
   ok: boolean;
   serverName: string;
@@ -83,6 +91,12 @@ export interface GetBookByIdResponse {
   book?: Book;
 }
 
+export interface GetBookEgzemplioriaiResponse {
+  ok: boolean;
+  message?: string;
+  egzemplioriai?: Egzempliorius[];
+}
+
 export const session = {
   getToken: () => localStorage.getItem("authToken"),
   getRole: () => localStorage.getItem("userRole"),
@@ -124,4 +138,7 @@ export const api = {
 
   getBookById: (bookId: string): Promise<GetBookByIdResponse> =>
     request<GetBookByIdResponse>(`books/${bookId}`),
+
+  getBookEgzemplioriai: (bookId: string): Promise<GetBookEgzemplioriaiResponse> =>
+    request<GetBookEgzemplioriaiResponse>(`books/${bookId}/egzemplioriai`),
 };

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, Book } from "@/lib/api";
+import { api, Book, Egzempliorius } from "@/lib/api";
 
 export default function BookDetail() {
   const router = useRouter();
@@ -12,6 +12,7 @@ export default function BookDetail() {
   const [authors, setAuthors] = useState<string[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [egzemplioriai, setEgzemplioriai] = useState<Egzempliorius[] | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -41,6 +42,17 @@ export default function BookDetail() {
       })
       .catch((err) => setError(err.message || "Klaida gaunant knygos duomenis"))
       .finally(() => setLoading(false));
+
+    api
+      .getBookEgzemplioriai(id as string)
+      .then((data) => {
+        if (data.ok && data.egzemplioriai) {
+          setEgzemplioriai(data.egzemplioriai);
+        }
+      })
+      .catch(() => {
+        setEgzemplioriai([]);
+      });
   }, [id]);
 
   if (loading) {
@@ -94,6 +106,35 @@ export default function BookDetail() {
           <p>
             <strong>Kaina:</strong> {book.kaina} €
           </p>
+        </CardContent>
+      </Card>
+
+      { /* Egzemplioriu sekcija */}
+      <Card className="w-full max-w-2xl bg-[var(--card)] text-[var(--card-foreground)] shadow-lg mt-6">
+        <CardHeader>
+          <CardTitle className="text-xl font-bold">
+            Egzemplioriai
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="flex flex-col gap-2 text-[var(--foreground)]">
+          {egzemplioriai && egzemplioriai.length > 0 ? (
+            egzemplioriai.map((egzempliorius) => (
+              <div key={egzempliorius.id} className="border-b border-[var(--border)] pb-2 mb-2">
+                <p>
+                  <strong>Būsena:</strong> {egzempliorius.statusas}
+                </p>
+                <p>
+                  <strong>Būkle:</strong> {egzempliorius.bukle}
+                </p>
+                <p>
+                  <strong>Isigijimo data:</strong> {egzempliorius.isigyta}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p>Nėra egzempliorių šiai knygai.</p>
+          )}
         </CardContent>
       </Card>
     </div>

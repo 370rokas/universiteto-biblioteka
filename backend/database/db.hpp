@@ -2,7 +2,7 @@
 #define UB_BACKEND_DATABASE_DB_HPP
 
 #define DATABASE_POOL_SIZE 5
-#define N_SQL_STATEMENTS 5
+#define N_SQL_STATEMENTS 6
 
 #include "database/pool.hpp"
 #include "database/types.hpp"
@@ -29,6 +29,9 @@ constexpr std::array<std::pair<const char *, const char *>, N_SQL_STATEMENTS> sq
 
     {"getBookById", 
     "SELECT id, isbn, pavadinimas, autoriai, zanras, leidykla, leidimo_metai, kaina FROM knyga WHERE id = $1::uuid;"},
+
+    {"getEgzemplioriaiByBookId",
+    "SELECT id, knygos_id, statusas, bukle, isigyta FROM egzempliorius WHERE knygos_id = $1::uuid;"}
 }};
 // clang-format on
 
@@ -50,6 +53,8 @@ class Database {
 											const std::string &password);
 	std::optional<Vartotojas> getUserByUsername(const std::string &username);
 	std::optional<Vartotojas> getUserById(const std::string &id);
+
+  std::optional<std::vector<Egzempliorius>> getEgzemplioriaiByBookId(const std::string &id);
 };
 
 #endif // UB_BACKEND_DATABASE_DB_HPP

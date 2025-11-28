@@ -30,6 +30,16 @@ Knyga parseRowToKnyga(const pqxx::row &row) {
 	return book;
 }
 
+Egzempliorius parseRowToEgzempliorius(const pqxx::row &row) {
+	Egzempliorius egz;
+	egz.id = row["id"].as<std::string>();
+	egz.knygos_id = row["knygos_id"].as<std::string>();
+	egz.statusas = row["statusas"].as<std::string>();
+	egz.bukle = row["bukle"].as<std::string>();
+	egz.isigyta = row["isigyta"].as<std::string>();
+	return egz;
+}
+
 Vartotojas parseRowToVartotojas(const pqxx::row &row) {
 	Vartotojas user;
 	user.id = row["id"].as<std::string>();
@@ -139,6 +149,26 @@ std::optional<Vartotojas> Database::getUserById(const std::string &id) {
 			"Nepavyko gauti vartotojo pagal ID (id: '{}'): {}", id,
 			e.what());
 
+		return std::nullopt;
+	}
+}
+
+std::optional<std::vector<Egzempliorius>> Database::getEgzemplioriaiByBookId(const std::string &id) {
+	try {
+		auto r = executeStatement("getEgzemplioriaiByBookId", pqxx::params{id});
+
+		std::vector<Egzempliorius> egzemplioriai;
+
+		for (const auto &row : r) {
+			egzemplioriai.push_back(parseRowToEgzempliorius(row));
+		}
+
+		return egzemplioriai;
+
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko gauti egzempliorių pagal knygos ID (id: '{}'): {}",
+			id, e.what());
 		return std::nullopt;
 	}
 }

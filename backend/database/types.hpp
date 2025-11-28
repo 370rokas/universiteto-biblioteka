@@ -26,4 +26,12 @@ struct Vartotojas {
 	std::string pareigos;
 };
 
+struct Egzempliorius {
+	std::string id;
+	std::string knygos_id;
+	std::string statusas;
+	std::string bukle;
+	std::string isigyta;
+};
+
 #endif // UB_BACKEND_DATABASE_TYPES_HPP

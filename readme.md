@@ -75,4 +75,7 @@ docker buildx bake
 # Individualiai:
 docker buildx build frontend/
 docker buildx build backend/
+
+# Testavimo aplinkos su docker-compose buildinimas ir paleidimas:
+docker compose -f docker-compose-dev.yml build && docker compose -f docker-compose-dev.yml up
 ```

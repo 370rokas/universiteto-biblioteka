@@ -85,6 +85,34 @@ inline void setupBooksRoutes(crow::App<UB_CROW_MIDDLEWARES> &app, Database *db) 
 														{"leidimo_metai", book.leidimo_metai},
 														{"kaina", book.kaina}}}});
 		});
+
+	// Gauti egzempliorius pagal knygos ID
+	CROW_ROUTE(app, "/books/<string>/egzemplioriai")
+		.methods(crow::HTTPMethod::GET)([&app, db](const crow::request &req, const std::string &egzId) {
+			auto &ctx = app.get_context<mw::TokenAuth>(req);
+			if (!mw::IsLoggedIn(ctx)) {
+				return crow::response(401, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Unauthorized"}});
+			}
+
+			auto egzemplioriai = db->getEgzemplioriaiByBookId(egzId);
+
+			auto egzJson = crow::json::wvalue::list();
+
+			for (const auto &egz : egzemplioriai.value()) {
+				egzJson.push_back(crow::json::wvalue{
+					{"id", egz.id},
+					{"knygos_id", egz.knygos_id},
+					{"statusas", egz.statusas},
+					{"bukle", egz.bukle},
+					{"isigyta", egz.isigyta}});
+			}
+
+			return crow::response(200, crow::json::wvalue{
+										   {"ok", true},
+										   {"egzemplioriai", egzJson}});
+		});
 }
 
 #endif // UB_API_ROUTES_BOOKS_HPP
