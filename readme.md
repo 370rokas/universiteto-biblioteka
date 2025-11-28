@@ -64,3 +64,15 @@ Nukopijuoti `example-config.json` ir jį pervadinti į `config.json`. Visas reik
 ```
 jwtSecret: sugeneruoti su `openssl rand -base64 32`
 ```
+
+### Kompiliacijos instrukcijos
+
+Naudoti Docker BuildX sistema.
+```sh
+# Buildinti front'a ir back'a
+docker buildx bake
+
+# Individualiai:
+docker buildx build frontend/
+docker buildx build backend/
+```

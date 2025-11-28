@@ -1,0 +1,23 @@
+# Frontendo builderis
+FROM node:25-alpine AS builder
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+# Serverio konteineris
+FROM node:25-alpine AS production
+WORKDIR /app
+
+COPY --from=builder /app/package*.json ./
+RUN npm ci --omit=dev
+
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+
+COPY --from=builder /app/next.config.ts ./
+
+CMD ["npm", "run", "start"]

@@ -1,0 +1,52 @@
+# Serverio builderis
+FROM debian:bookworm AS build
+
+# Reikalavimai
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    build-essential \
+    cmake \
+    git \
+    libpq-dev \
+    wget \
+    ninja-build \
+    python3 \
+    zlib1g-dev \
+    libasio-dev \
+    libspdlog-dev \
+    nlohmann-json3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build libpqxx
+RUN git clone -b 7.10.1 https://github.com/jtv/libpqxx.git /tmp/libpqxx \
+    && cd /tmp/libpqxx \
+    && mkdir build && cd build \
+    && cmake -DCMAKE_BUILD_TYPE=Release -DSKIP_BUILD_TEST=on -DCMAKE_INSTALL_PREFIX=/usr/local .. \
+    && cmake --build . --target install
+
+WORKDIR /app
+COPY . .
+
+RUN cmake -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_CXX_FLAGS="-O3 -march=native" \
+    -DCMAKE_PREFIX_PATH="/usr/local" \
+    -DPostgreSQL_INCLUDE_DIR=/usr/include \
+    -DPostgreSQL_LIBRARY=/usr/lib/x86_64-linux-gnu/libpq.so
+
+RUN cmake --build build --target ub-backend
+
+# Serverio konteineris
+FROM debian:bookworm-slim AS runtime
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libssl3 \
+    zlib1g \
+    libpq5 \
+    libspdlog-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY --from=build /app/bin/* ./
+
+CMD ["./ub-backend"]

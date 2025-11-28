@@ -9,6 +9,7 @@ export default function BookDetail() {
   const router = useRouter();
   const { id } = useParams(); // expects /books/[id]
   const [book, setBook] = useState<Book | null>(null);
+  const [authors, setAuthors] = useState<string[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,16 +20,19 @@ export default function BookDetail() {
     setError(null);
 
     api
-      .getBookById(id)
+      .getBookById(id as string)
       .then((data) => {
         if (data.ok && data.book) {
           // Parse authors JSON
           try {
-            data.book.autoriai = JSON.parse(
-              data.book.autoriai
-            ) as unknown as string[];
+            const parsedAuthors = JSON.parse(data.book.autoriai);
+            if (Array.isArray(parsedAuthors)) {
+              setAuthors(parsedAuthors);
+            } else {
+              setAuthors([data.book.autoriai]);
+            }
           } catch {
-            // leave as string if parsing fails
+            setAuthors([data.book.autoriai]);
           }
           setBook(data.book);
         } else {
@@ -73,10 +77,7 @@ export default function BookDetail() {
 
         <CardContent className="flex flex-col gap-2 text-[var(--foreground)]">
           <p>
-            <strong>Autoriai:</strong>{" "}
-            {Array.isArray(book.autoriai)
-              ? (book.autoriai as string[]).join(", ")
-              : book.autoriai}
+            <strong>Autoriai:</strong> {authors}
           </p>
           <p>
             <strong>Leidykla:</strong> {book.leidykla}

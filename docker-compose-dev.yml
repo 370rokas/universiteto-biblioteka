@@ -1,0 +1,20 @@
+services:
+  ub-frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    container_name: ub-frontend
+    network_mode: "host"
+    depends_on:
+      - ub-backend
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:2233/
+  
+  ub-backend:
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+    container_name: ub-backend
+    volumes:
+      - ./config.json:/app/config.json:ro
+    network_mode: "host"

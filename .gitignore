@@ -5,5 +5,5 @@ bin/
 
 books_xml/
 books_xml.zip
-.env
+*.env
 config.json

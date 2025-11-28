@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:1122/";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:2233/";
 
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
