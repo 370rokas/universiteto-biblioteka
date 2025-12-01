@@ -12,6 +12,7 @@ enum class IsdavimoStatusas {
 
 namespace valdymas {
 IsdavimoStatusas isduotiEgzemplioriu(const std::string &egzId, const std::string &userId);
-}
+void atnaujintiSkolas();
+} // namespace valdymas
 
 #endif // UB_BACKEND_VALDYMAS_ISDAVIMAS_HPP

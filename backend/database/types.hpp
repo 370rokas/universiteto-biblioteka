@@ -45,4 +45,12 @@ struct SkolinimoIstorijosIrasas {
 	bool sumoketa;
 };
 
+struct SkolosDuomenysAtnaujinimui {
+	std::string skolos_id;
+	double skolos_daugiklis;
+	std::string nuoma_nuo;
+	std::string nuoma_iki;
+	double kaina;
+};
+
 #endif // UB_BACKEND_DATABASE_TYPES_HPP

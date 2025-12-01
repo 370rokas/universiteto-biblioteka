@@ -2,7 +2,7 @@
 #define UB_BACKEND_DATABASE_DB_HPP
 
 #define DATABASE_POOL_SIZE 5
-#define N_SQL_STATEMENTS 10
+#define N_SQL_STATEMENTS 13
 
 #include "database/pool.hpp"
 #include "database/types.hpp"
@@ -49,7 +49,42 @@ constexpr std::array<std::pair<const char *, const char *>, N_SQL_STATEMENTS> sq
     "JOIN knyga k ON e.knygos_id = k.id "
     "LEFT JOIN skola s ON n.skolos_id = s.id "
     "WHERE n.vartotojo_id = $1::uuid "
-    "ORDER BY n.nuoma_nuo DESC;"}
+    "ORDER BY n.nuoma_nuo DESC;"},
+
+    {"gautiSkolasAtnaujinimui",
+      "SELECT s.id as skolos_id, p.skolosdaugiklis as skolos_daugiklis, n.nuoma_nuo, n.nuoma_iki, k.kaina "
+        "FROM skola s "
+        "JOIN nuoma n ON n.skolos_id = s.id "
+        "JOIN egzempliorius e ON e.id = n.egzemplioriaus_id "
+        "JOIN knyga k ON k.id = e.knygos_id "
+        "JOIN vartotojai v ON s.vartotojo_id = v.id "
+        "JOIN pareigos p ON p.pavadinimas = v.pareigos "
+      "WHERE s.sumoketa IS FALSE;"},
+
+    {"sukurtiSkolas",
+      "DO $$ "
+        "DECLARE "
+            "r RECORD; "
+            "new_skola_id UUID; "
+        "BEGIN "
+            "FOR r IN " 
+                "SELECT vartotojo_id, id " 
+                "FROM nuoma "
+                "WHERE skolos_id IS NULL "
+                  "AND CURRENT_DATE > nuoma_iki "
+            "LOOP "
+                "INSERT INTO skola (vartotojo_id, suma) "
+                "VALUES (r.vartotojo_id, 0) "
+                "RETURNING id INTO new_skola_id; "
+                "UPDATE nuoma "
+                "SET skolos_id = new_skola_id "
+                "WHERE id = r.id; "
+            "END LOOP; "
+        "END; "
+      "$$;"},
+
+      {"atnaujintiSkolosSuma",
+      "UPDATE skola SET suma = $1::NUMERIC(10,2) WHERE id = $2::UUID;"}
 }};
 // clang-format on
 
@@ -77,6 +112,8 @@ class Database {
 	bool updateEgzemplioriusStatusas(const std::string &id, const std::string &statusas);
 	bool sukurtiNuomosIrasa(const std::string &egzId, const std::string &userId);
 	std::vector<SkolinimoIstorijosIrasas> gautiNuomosIstorija(const std::string &userId);
+
+	std::vector<SkolosDuomenysAtnaujinimui> gautiSkolasAtnaujinimui();
 };
 
 extern std::shared_ptr<Database> dbGlobalus;

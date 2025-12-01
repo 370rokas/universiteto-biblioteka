@@ -42,13 +42,13 @@ CREATE TABLE IF NOT EXISTS pareigos (
     pavadinimas VARCHAR(50) PRIMARY KEY NOT NULL,
 
     skolinimoTerminas INTEGER NOT NULL,
-    skolosDaugilkis NUMERIC(10, 2) NOT NULL
+    skolosDaugiklis NUMERIC(10, 2) NOT NULL
 );
 
-INSERT INTO pareigos (pavadinimas, skolinimoTerminas, skolosDaugilkis)
+INSERT INTO pareigos (pavadinimas, skolinimoTerminas, skolosDaugiklis)
 VALUES
-    ('studentas', 30, 1.0),
-    ('destytojas', 60, 0.5),
+    ('studentas', 14, 1.0),
+    ('destytojas', 90, 0.5),
     ('administracija', 365, 0.0)
 ON CONFLICT (pavadinimas) DO NOTHING;
 

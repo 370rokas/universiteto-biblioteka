@@ -1,8 +1,7 @@
 {
   "databaseUrl": "",
   "apiPort": 2233,
-
   "jwtSecret": "openssl rand -base64 32",
-
-  "serverName": "Test Biblioteka"
+  "serverName": "Test Biblioteka",
+  "skolosProcentasNuoKainosKasdien": 0.01
 }

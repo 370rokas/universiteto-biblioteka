@@ -245,3 +245,30 @@ std::vector<SkolinimoIstorijosIrasas> Database::gautiNuomosIstorija(const std::s
 		return {};
 	}
 }
+
+std::vector<SkolosDuomenysAtnaujinimui> Database::gautiSkolasAtnaujinimui() {
+	try {
+		auto r = executeStatement("gautiSkolasAtnaujinimui", pqxx::params{});
+
+		std::vector<SkolosDuomenysAtnaujinimui> skolos;
+
+		for (const auto &row : r) {
+			SkolosDuomenysAtnaujinimui skola;
+			skola.skolos_id = row["skolos_id"].as<std::string>();
+			skola.skolos_daugiklis = row["skolos_daugiklis"].as<double>();
+			skola.nuoma_nuo = row["nuoma_nuo"].as<std::string>();
+			skola.nuoma_iki = row["nuoma_iki"].as<std::string>();
+			skola.kaina = row["kaina"].as<double>();
+
+			skolos.push_back(skola);
+		}
+
+		return skolos;
+
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko gauti skolų atnaujinimui: {}",
+			e.what());
+		return {};
+	}
+}
