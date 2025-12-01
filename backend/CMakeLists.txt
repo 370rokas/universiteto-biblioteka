@@ -21,6 +21,8 @@ add_executable(ub-backend
     database/db.cpp
     database/queries.cpp
 
+    valdymas/isdavimas.cpp
+
     utils/config.cpp
 )
 

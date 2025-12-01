@@ -2,6 +2,7 @@
 
 #include "api/routes/auth.hpp"
 #include "api/routes/books.hpp"
+#include "api/routes/user.hpp"
 
 void WebApi::run() {
 	crow::logger::setHandler(&_logger);
@@ -14,6 +15,7 @@ void WebApi::run() {
 	});
 
 	setupAuthRoutes(_app, _db);
+	setupUserRoutes(_app, _db);
 	setupBooksRoutes(_app, _db);
 
 	_app.loglevel(crow::LogLevel::WARNING);

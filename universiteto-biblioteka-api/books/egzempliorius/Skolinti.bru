@@ -1,0 +1,20 @@
+meta {
+  name: Skolinti
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/books/egzempliorius/:egzempliorius_id/borrow
+  body: none
+  auth: inherit
+}
+
+params:path {
+  egzempliorius_id: {{egzemplioriusId}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -34,4 +34,15 @@ struct Egzempliorius {
 	std::string isigyta;
 };
 
+struct SkolinimoIstorijosIrasas {
+	std::string id;
+	std::string pavadinimas;
+	std::string autoriai;
+	std::string nuoma_nuo;
+	std::string nuoma_iki;
+	std::string grazinimo_laikas;
+	std::string suma;
+	bool sumoketa;
+};
+
 #endif // UB_BACKEND_DATABASE_TYPES_HPP

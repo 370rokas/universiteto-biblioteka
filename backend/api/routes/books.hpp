@@ -3,6 +3,7 @@
 
 #include "api/middlewares.hpp"
 #include "database/db.hpp"
+#include "valdymas/isdavimas.hpp"
 
 inline void setupBooksRoutes(crow::App<UB_CROW_MIDDLEWARES> &app, Database *db) {
 
@@ -112,6 +113,69 @@ inline void setupBooksRoutes(crow::App<UB_CROW_MIDDLEWARES> &app, Database *db) 
 			return crow::response(200, crow::json::wvalue{
 										   {"ok", true},
 										   {"egzemplioriai", egzJson}});
+		});
+
+	// Egzemplioriaus info pagal id
+	CROW_ROUTE(app, "/books/egzempliorius/<string>")
+		.methods(crow::HTTPMethod::GET)([&app, db](const crow::request &req, const std::string &egzId) {
+			auto &ctx = app.get_context<mw::TokenAuth>(req);
+			if (!mw::IsLoggedIn(ctx)) {
+				return crow::response(401, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Unauthorized"}});
+			}
+
+			auto egzOpt = db->getEgzemplioriusById(egzId);
+
+			if (!egzOpt.has_value()) {
+				return crow::response(404, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Egzempliorius nerastas"}});
+			}
+
+			const auto &egz = egzOpt.value();
+			return crow::response(200, crow::json::wvalue{
+										   {"ok", true},
+										   {"egzempliorius", crow::json::wvalue{
+																 {"id", egz.id},
+																 {"knygos_id", egz.knygos_id},
+																 {"statusas", egz.statusas},
+																 {"bukle", egz.bukle},
+																 {"isigyta", egz.isigyta}}}});
+		});
+
+	// Pasiskolinti egzempliorių
+	CROW_ROUTE(app, "/books/egzempliorius/<string>/borrow")
+		.methods(crow::HTTPMethod::POST)([&app, db](const crow::request &req, const std::string &egzId) {
+			auto &ctx = app.get_context<mw::TokenAuth>(req);
+			if (!mw::IsLoggedIn(ctx)) {
+				return crow::response(401, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Unauthorized"}});
+			}
+
+			auto userId = ctx.tokenData.userId;
+
+			auto resp = valdymas::isduotiEgzemplioriu(egzId, userId);
+
+			switch (resp) {
+			case IsdavimoStatusas::SEKMINGAI:
+				return crow::response(200, crow::json::wvalue{
+											   {"ok", true},
+											   {"message", "Egzempliorius sėkmingai pasiskolintas"}});
+			case IsdavimoStatusas::EGZEMPLIORIUS_NERASTAS:
+				return crow::response(404, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Egzempliorius nerastas"}});
+			case IsdavimoStatusas::JAU_ISDUOTAS:
+				return crow::response(400, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Egzempliorius yra jau išduotas"}});
+			default:
+				return crow::response(500, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Įvyko serverio klaida"}});
+			};
 		});
 }
 

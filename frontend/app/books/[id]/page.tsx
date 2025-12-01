@@ -47,6 +47,13 @@ export default function BookDetail() {
       .getBookEgzemplioriai(id as string)
       .then((data) => {
         if (data.ok && data.egzemplioriai) {
+          // Rikiuoti pagal ar laisva ir tada pagal isigijimo data
+          data.egzemplioriai.sort((a, b) => {
+            if (a.statusas === "laisva" && b.statusas !== "laisva") return -1;
+            if (a.statusas !== "laisva" && b.statusas === "laisva") return 1;
+            return new Date(a.isigyta).getTime() - new Date(b.isigyta).getTime();
+          });
+
           setEgzemplioriai(data.egzemplioriai);
         }
       })
@@ -118,18 +125,58 @@ export default function BookDetail() {
         </CardHeader>
 
         <CardContent className="flex flex-col gap-2 text-[var(--foreground)]">
+          { /* Kaireje puseje: info, desneje mygtukas */}
           {egzemplioriai && egzemplioriai.length > 0 ? (
             egzemplioriai.map((egzempliorius) => (
-              <div key={egzempliorius.id} className="border-b border-[var(--border)] pb-2 mb-2">
-                <p>
-                  <strong>Būsena:</strong> {egzempliorius.statusas}
-                </p>
-                <p>
-                  <strong>Būkle:</strong> {egzempliorius.bukle}
-                </p>
-                <p>
-                  <strong>Isigijimo data:</strong> {egzempliorius.isigyta}
-                </p>
+              <div
+                key={egzempliorius.id}
+                className="flex justify-between items-center p-4 border border-[var(--border)] rounded"
+              >
+                <div>
+                  <p>
+                    <strong>Bukle:</strong> {egzempliorius.bukle}
+                  </p>
+                  <p>
+                    <strong>Statusas:</strong> {egzempliorius.statusas}
+                  </p>
+                  <p>
+                    <strong>Įsigijimo data:</strong>{" "}
+                    {new Date(egzempliorius.isigyta).toLocaleDateString()}
+                  </p>
+                </div>
+                <div>
+                  {egzempliorius.statusas === "laisva" ? (
+                    <button
+                      className="px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] rounded hover:bg-[var(--primary-hover)]"
+                      onClick={() =>
+                        api.nuomotiEgzemplioriu(egzempliorius.id).then((resp) => {
+                          alert("Knyga sėkmingai pasiskolinta!");
+                          router.push(`/user/istorija`);
+                        }).catch((err) => {
+                          alert(`Klaida: ${err.message}`);
+                          router.refresh();
+                        })
+                      }
+                    >
+                      Skolintis
+                    </button>
+                  ) : (
+                    <button
+                      className="px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] rounded hover:bg-[var(--primary-hover)]"
+                      onClick={() =>
+                        api.rezervuotiEgzemplioriu(egzempliorius.id).then((resp) => {
+                          alert("Knyga sėkmingai rezervuota!");
+                          router.push(`/user/rezervacijos`);
+                        }).catch((err) => {
+                          alert(`Klaida: ${err.message}`);
+                          router.refresh();
+                        })
+                      }
+                    >
+                      Rezervuoti
+                    </button>
+                  )}
+                </div>
               </div>
             ))
           ) : (

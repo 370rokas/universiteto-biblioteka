@@ -97,6 +97,17 @@ export interface GetBookEgzemplioriaiResponse {
   egzemplioriai?: Egzempliorius[];
 }
 
+export interface SkolinimuIstorijosIrasas {
+  id: string;
+  pavadinimas: string;
+  autoriai: string;
+  nuoma_nuo: string;
+  nuoma_iki: string;
+  grazinimo_laikas: string;
+  suma: string;
+  sumoketa: boolean;
+}
+
 export const session = {
   getToken: () => localStorage.getItem("authToken"),
   getRole: () => localStorage.getItem("userRole"),
@@ -141,4 +152,22 @@ export const api = {
 
   getBookEgzemplioriai: (bookId: string): Promise<GetBookEgzemplioriaiResponse> =>
     request<GetBookEgzemplioriaiResponse>(`books/${bookId}/egzemplioriai`),
+
+  nuomotiEgzemplioriu: (egzemplioriusId: string): Promise<{ ok: boolean; message?: string }> =>
+    request<{ ok: boolean; message?: string }>(`books/egzempliorius/${egzemplioriusId}/borrow`, {
+      method: "POST",
+    }),
+
+  rezervuotiEgzemplioriu: (egzemplioriusId: string): Promise<{ ok: boolean; message?: string }> =>
+    request<{ ok: boolean; message?: string }>(`books/egzempliorius/${egzemplioriusId}/reserve`, {
+      method: "POST",
+    }),
+
+  grazintiEgzemplioriu: (egzemplioriusId: string): Promise<{ ok: boolean; message?: string }> =>
+    request<{ ok: boolean; message?: string }>(`books/egzempliorius/${egzemplioriusId}/return`, {
+      method: "POST",
+    }),
+
+  skolinimuIstorija: (): Promise<{ ok: boolean, message?: string, istorija?: SkolinimuIstorijosIrasas[] }> =>
+    request<{ ok: boolean, message?: string, istorija?: SkolinimuIstorijosIrasas[] }>("user/istorija"),
 };

@@ -2,7 +2,7 @@
 #define UB_BACKEND_DATABASE_DB_HPP
 
 #define DATABASE_POOL_SIZE 5
-#define N_SQL_STATEMENTS 6
+#define N_SQL_STATEMENTS 10
 
 #include "database/pool.hpp"
 #include "database/types.hpp"
@@ -31,7 +31,25 @@ constexpr std::array<std::pair<const char *, const char *>, N_SQL_STATEMENTS> sq
     "SELECT id, isbn, pavadinimas, autoriai, zanras, leidykla, leidimo_metai, kaina FROM knyga WHERE id = $1::uuid;"},
 
     {"getEgzemplioriaiByBookId",
-    "SELECT id, knygos_id, statusas, bukle, isigyta FROM egzempliorius WHERE knygos_id = $1::uuid;"}
+    "SELECT id, knygos_id, statusas, bukle, isigyta FROM egzempliorius WHERE knygos_id = $1::uuid;"},
+
+    {"getEgzemplioriusById",
+    "SELECT id, knygos_id, statusas, bukle, isigyta FROM egzempliorius WHERE id = $1::uuid;"},
+
+    {"updateEgzemplioriausStatusa",
+    "UPDATE egzempliorius SET statusas = CAST($2::text as egz_statusas) WHERE id = $1::uuid;"},
+
+    {"sukurtiNuomosIrasa",
+    "INSERT INTO nuoma (egzemplioriaus_id, vartotojo_id, nuoma_nuo) VALUES ($1::uuid, $2::uuid, NOW());"},
+
+    {"gautiNuomosIstorija",
+    "SELECT n.id, n.nuoma_nuo, n.nuoma_iki, n.grazinimo_laikas, k.pavadinimas, k.autoriai, s.suma, s.sumoketa "
+    "FROM nuoma n "
+    "JOIN egzempliorius e ON n.egzemplioriaus_id = e.id "
+    "JOIN knyga k ON e.knygos_id = k.id "
+    "LEFT JOIN skola s ON n.skolos_id = s.id "
+    "WHERE n.vartotojo_id = $1::uuid "
+    "ORDER BY n.nuoma_nuo DESC;"}
 }};
 // clang-format on
 
@@ -54,7 +72,13 @@ class Database {
 	std::optional<Vartotojas> getUserByUsername(const std::string &username);
 	std::optional<Vartotojas> getUserById(const std::string &id);
 
-  std::optional<std::vector<Egzempliorius>> getEgzemplioriaiByBookId(const std::string &id);
+	std::optional<std::vector<Egzempliorius>> getEgzemplioriaiByBookId(const std::string &id);
+	std::optional<Egzempliorius> getEgzemplioriusById(const std::string &id);
+	bool updateEgzemplioriusStatusas(const std::string &id, const std::string &statusas);
+	bool sukurtiNuomosIrasa(const std::string &egzId, const std::string &userId);
+	std::vector<SkolinimoIstorijosIrasas> gautiNuomosIstorija(const std::string &userId);
 };
+
+extern std::shared_ptr<Database> dbGlobalus;
 
 #endif // UB_BACKEND_DATABASE_DB_HPP

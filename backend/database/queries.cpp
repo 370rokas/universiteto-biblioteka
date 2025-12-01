@@ -1,5 +1,6 @@
 #include "database/db.hpp"
 
+#include "database/types.hpp"
 #include "utils/logger.hpp"
 
 #include <bcrypt.h>
@@ -170,5 +171,77 @@ std::optional<std::vector<Egzempliorius>> Database::getEgzemplioriaiByBookId(con
 			"Nepavyko gauti egzempliorių pagal knygos ID (id: '{}'): {}",
 			id, e.what());
 		return std::nullopt;
+	}
+}
+
+std::optional<Egzempliorius> Database::getEgzemplioriusById(const std::string &id) {
+	try {
+		auto r = executeStatement("getEgzemplioriusById", pqxx::params{id});
+
+		if (r.size() == 0) {
+			return std::nullopt;
+		}
+
+		return parseRowToEgzempliorius(r[0]);
+
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko gauti egzemplioriaus pagal ID (id: '{}'): {}",
+			id, e.what());
+		return std::nullopt;
+	}
+}
+
+bool Database::updateEgzemplioriusStatusas(const std::string &id, const std::string &statusas) {
+	try {
+		executeStatement("updateEgzemplioriausStatusa", pqxx::params{id, statusas});
+		return true;
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko atnaujinti egzemplioriaus statuso (id: '{}', statusas: '{}'): {}",
+			id, statusas, e.what());
+		return false;
+	}
+}
+
+bool Database::sukurtiNuomosIrasa(const std::string &egzId, const std::string &userId) {
+	try {
+		executeStatement("sukurtiNuomosIrasa", pqxx::params{egzId, userId});
+		return true;
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko sukurti nuomos įrašo (egzId: '{}', userId: '{}'): {}",
+			egzId, userId, e.what());
+		return false;
+	}
+}
+
+std::vector<SkolinimoIstorijosIrasas> Database::gautiNuomosIstorija(const std::string &userId) {
+	try {
+		auto r = executeStatement("gautiNuomosIstorija", pqxx::params{userId});
+
+		std::vector<SkolinimoIstorijosIrasas> istorija;
+
+		for (const auto &row : r) {
+			SkolinimoIstorijosIrasas irasas;
+			irasas.id = row["id"].as<std::string>();
+			irasas.pavadinimas = row["pavadinimas"].as<std::string>();
+			irasas.autoriai = row["autoriai"].as<std::string>();
+			irasas.nuoma_nuo = row["nuoma_nuo"].as<std::string>();
+			irasas.nuoma_iki = row["nuoma_iki"].as<std::string>();
+			irasas.grazinimo_laikas = row["grazinimo_laikas"].is_null() ? "" : row["grazinimo_laikas"].as<std::string>();
+			irasas.suma = row["suma"].is_null() ? "" : row["suma"].as<std::string>();
+			irasas.sumoketa = row["sumoketa"].is_null() ? true : row["sumoketa"].as<bool>();
+
+			istorija.push_back(irasas);
+		}
+
+		return istorija;
+
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko gauti nuomos istorijos (userId: '{}'): {}",
+			userId, e.what());
+		return {};
 	}
 }

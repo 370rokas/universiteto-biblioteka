@@ -56,14 +56,22 @@ export default function Dashboard() {
           <Button
             variant="default"
             className="bg-[var(--secondary)] hover:bg-[var(--accent)] text-[var(--secondary-foreground)]"
-            onClick={() => router.push("/profile")}
+            onClick={() => router.push("/user/istorija")}
           >
-            Mano profilis
+            Mano skolinimai
           </Button>
 
           <Button
             variant="default"
-            className="bg-[var(--destructive)] hover:bg-[var(--accent)] text-[var(--destructive)]"
+            className="bg-[var(--accent)] hover:bg-[var(--primary)] text-[var(--accent-foreground)]"
+            onClick={() => router.push("/user/rezervacijos")}
+          >
+            Mano rezervacijos
+          </Button>
+
+          <Button
+            variant="default"
+            className="bg-[var(--primary)] hover:bg-[var(--accent)] text-[var(--destructive)]"
             onClick={() => {
               localStorage.removeItem("authToken");
               router.push("/login");

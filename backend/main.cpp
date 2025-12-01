@@ -20,8 +20,9 @@ int main() {
 	std::signal(SIGTERM, signaluHandleris);
 
 	// Paleidziam DB ir API
-	Database db(config::get()["databaseUrl"]);
-	WebApi api(config::get()["apiPort"], &db);
+	dbGlobalus = std::make_shared<Database>(config::get()["databaseUrl"]);
+	// Database db(config::get()["databaseUrl"]);
+	WebApi api(config::get()["apiPort"], dbGlobalus.get());
 	api.run();
 
 	while (running) {
