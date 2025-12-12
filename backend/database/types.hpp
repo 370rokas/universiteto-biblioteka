@@ -53,4 +53,14 @@ struct SkolosDuomenysAtnaujinimui {
 	double kaina;
 };
 
+struct AktyviosNuomosData {
+	std::string nuoma_id;
+	std::string egzemplioriaus_id;
+	std::string vartotojo_id;
+	std::string nuoma_nuo;
+	std::string nuoma_iki;
+	double skolos_suma;
+	bool skola_sumoketa;
+};
+
 #endif // UB_BACKEND_DATABASE_TYPES_HPP

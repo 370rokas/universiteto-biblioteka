@@ -4,6 +4,7 @@ import { api, SkolinimuIstorijosIrasas } from "@/lib/api";
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { IstorijaTable } from "./istorija-table";
+import { Button } from "@/components/ui/button";
 
 export const columns: ColumnDef<SkolinimuIstorijosIrasas>[] = [
     {
@@ -30,6 +31,26 @@ export const columns: ColumnDef<SkolinimuIstorijosIrasas>[] = [
     {
         accessorKey: "grazinimo_laikas",
         header: "Grazininimo laikas",
+        cell: ({ row }) => {
+            const grazinimo_laikas: string = row.getValue("grazinimo_laikas");
+
+            if (!grazinimo_laikas) {
+                return <Button variant="outline" size="sm" onClick={() => {
+                    const id: string = row.original.id;
+                    api.grazintiEgzemplioriu(id).then(() => {
+                        alert("Knyga sėkmingai grąžinta!");
+                        window.location.reload();
+                    }).catch((error) => {
+                        alert("Klaida grąžinant knygą: " + error.message);
+                    });
+                }}> Gražinti </Button>;
+
+            } else {
+                const date = new Date(grazinimo_laikas);
+                return date.toLocaleDateString();
+            }
+
+        }
     },
     {
         accessorKey: "suma",

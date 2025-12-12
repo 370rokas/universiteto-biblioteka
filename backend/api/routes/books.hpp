@@ -177,6 +177,30 @@ inline void setupBooksRoutes(crow::App<UB_CROW_MIDDLEWARES> &app, Database *db) 
 											   {"message", "Įvyko serverio klaida"}});
 			};
 		});
+
+	// Grąžinti egzempliorių
+	CROW_ROUTE(app, "/books/egzempliorius/<string>/return")
+		.methods(crow::HTTPMethod::POST)([&app, db](const crow::request &req, const std::string &skolosId) {
+			auto &ctx = app.get_context<mw::TokenAuth>(req);
+			if (!mw::IsLoggedIn(ctx)) {
+				return crow::response(401, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Unauthorized"}});
+			}
+
+			auto userId = ctx.tokenData.userId;
+			auto pavyko = valdymas::grazintiEgzemplioriu(skolosId, userId);
+
+			if (pavyko) {
+				return crow::response(200, crow::json::wvalue{
+											   {"ok", true},
+											   {"message", "Egzempliorius sėkmingai grąžintas"}});
+			} else {
+				return crow::response(400, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Egzemplioriaus grąžinimas nepavyko"}});
+			}
+		});
 }
 
 #endif // UB_API_ROUTES_BOOKS_HPP

@@ -1,0 +1,24 @@
+meta {
+  name: Grazinti
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/books/egzempliorius/:skolos_id/return
+  body: none
+  auth: inherit
+}
+
+params:path {
+  skolos_id: 
+}
+
+vars:pre-request {
+  egzemplioriusId: e99d8bc9-1d9b-453e-bee2-73547f853efa
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

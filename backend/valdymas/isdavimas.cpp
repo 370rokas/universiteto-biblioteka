@@ -1,6 +1,7 @@
 #include "isdavimas.hpp"
 #include "../database/db.hpp"
 #include "utils/logger.hpp"
+#include "valdymas/skolos.hpp"
 #include <stdexcept>
 
 IsdavimoStatusas valdymas::isduotiEgzemplioriu(const std::string &egzId, const std::string &userId) {
@@ -39,5 +40,41 @@ IsdavimoStatusas valdymas::isduotiEgzemplioriu(const std::string &egzId, const s
 	} catch (const std::exception &e) {
 		logger::get()->error("Klaida gaunant egzemplioriu (e: {}; u: {}): {}", egzId, userId, e.what());
 		return IsdavimoStatusas::KLAIDA;
+	}
+}
+
+bool valdymas::grazintiEgzemplioriu(const std::string &nuomosId, const std::string &userId) {
+	try {
+		if (nuomosId.empty() || userId.empty()) {
+			throw std::invalid_argument("skolosId arba userId negali būti tušti");
+		};
+
+		auto skolaOpt = dbGlobalus->gautiNuomaPagalNuomosId(nuomosId);
+
+		if (!skolaOpt.has_value()) {
+			logger::get()->warn("Aktyvi nuoma nerasta grąžinant egzemplioriu (n: {}; u: {})", nuomosId, userId);
+			return false;
+		}
+
+		const auto &skola = skolaOpt.value();
+		if (userId != skola.vartotojo_id) {
+			logger::get()->warn("Vartotojo ID nesutampa grąžinant egzemplioriu (n: {}; u: {})", nuomosId, userId);
+			return false;
+		}
+
+		// Atnaujinti skolas!
+		valdymas::atnaujintiSkolas();
+
+		dbGlobalus->executeSql(
+			"UPDATE nuoma SET grazinimo_laikas = CURRENT_TIMESTAMP WHERE id = $1::UUID;",
+			pqxx::params{nuomosId});
+
+		dbGlobalus->updateEgzemplioriusStatusas(skola.egzemplioriaus_id, "laisva");
+
+		return true;
+
+	} catch (const std::exception &e) {
+		logger::get()->error("Klaida grąžinant egzemplioriu (n: {}; u: {}): {}", nuomosId, userId, e.what());
+		return false;
 	}
 }

@@ -61,6 +61,15 @@ pqxx::result Database::executeStatement(const std::string &statementName,
 	return r;
 }
 
+pqxx::result Database::executeSql(const std::string &sql, const pqxx::params &params) {
+	auto conn = _pool.get_connection();
+	pqxx::work txn(*conn);
+	pqxx::result r = txn.exec(sql, params);
+	txn.commit();
+
+	return r;
+}
+
 std::vector<Knyga> Database::searchBooks(const std::string &query) {
 	try {
 		logger::get()->info("Ieškoma knygų su užklausa: {}", query);
@@ -270,5 +279,59 @@ std::vector<SkolosDuomenysAtnaujinimui> Database::gautiSkolasAtnaujinimui() {
 			"Nepavyko gauti skolų atnaujinimui: {}",
 			e.what());
 		return {};
+	}
+}
+
+std::optional<AktyviosNuomosData> Database::gautiAktyviaNuomaPagalEgzId(const std::string &egzId) {
+	try {
+		auto r = executeStatement("gautiAktyviaSkolaPagalEgzemplioriausId", pqxx::params{egzId});
+
+		if (r.size() == 0) {
+			return std::nullopt;
+		}
+
+		AktyviosNuomosData skola;
+		skola.nuoma_id = r[0]["id"].as<std::string>();
+		skola.vartotojo_id = r[0]["vartotojo_id"].as<std::string>();
+		skola.egzemplioriaus_id = r[0]["egzemplioriaus_id"].as<std::string>();
+		skola.nuoma_nuo = r[0]["nuoma_nuo"].as<std::string>();
+		skola.nuoma_iki = r[0]["nuoma_iki"].as<std::string>();
+		skola.skolos_suma = r[0]["suma"].is_null() ? 0.0 : r[0]["suma"].as<double>();
+		skola.skola_sumoketa = r[0]["sumoketa"].is_null() ? true : r[0]["sumoketa"].as<bool>();
+
+		return skola;
+
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko gauti aktyvios skolos pagal egzemplioriaus ID (egzId: '{}'): {}",
+			egzId, e.what());
+		return std::nullopt;
+	}
+}
+
+std::optional<AktyviosNuomosData> Database::gautiNuomaPagalNuomosId(const std::string &skolosId) {
+	try {
+		auto r = executeStatement("gautiAktyviaSkolaPagalSkolosId", pqxx::params{skolosId});
+
+		if (r.size() == 0) {
+			return std::nullopt;
+		}
+
+		AktyviosNuomosData skola;
+		skola.nuoma_id = r[0]["id"].as<std::string>();
+		skola.vartotojo_id = r[0]["vartotojo_id"].as<std::string>();
+		skola.egzemplioriaus_id = r[0]["egzemplioriaus_id"].as<std::string>();
+		skola.nuoma_nuo = r[0]["nuoma_nuo"].as<std::string>();
+		skola.nuoma_iki = r[0]["nuoma_iki"].as<std::string>();
+		skola.skolos_suma = r[0]["suma"].is_null() ? 0.0 : r[0]["suma"].as<double>();
+		skola.skola_sumoketa = r[0]["sumoketa"].is_null() ? true : r[0]["sumoketa"].as<bool>();
+
+		return skola;
+
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko gauti aktyvios skolos pagal skolos ID (skolosId: '{}'): {}",
+			skolosId, e.what());
+		return std::nullopt;
 	}
 }

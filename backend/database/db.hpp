@@ -2,7 +2,7 @@
 #define UB_BACKEND_DATABASE_DB_HPP
 
 #define DATABASE_POOL_SIZE 5
-#define N_SQL_STATEMENTS 13
+#define N_SQL_STATEMENTS 15
 
 #include "database/pool.hpp"
 #include "database/types.hpp"
@@ -84,7 +84,17 @@ constexpr std::array<std::pair<const char *, const char *>, N_SQL_STATEMENTS> sq
       "$$;"},
 
       {"atnaujintiSkolosSuma",
-      "UPDATE skola SET suma = $1::NUMERIC(10,2) WHERE id = $2::UUID;"}
+      "UPDATE skola SET suma = $1::NUMERIC(10,2) WHERE id = $2::UUID;"},
+
+      {"gautiAktyviaSkolaPagalEgzemplioriausId",
+          "SELECT n.id, n.vartotojo_id, n.egzemplioriaus_id, n.nuoma_nuo, n.nuoma_iki, s.suma, s.sumoketa "
+          "FROM nuoma n LEFT JOIN skola s ON n.skolos_id = s.id "
+          "WHERE n.egzemplioriaus_id = $1::UUID AND n.grazinimo_laikas IS NULL;"},
+
+      {"gautiAktyviaSkolaPagalSkolosId",
+          "SELECT n.id, n.vartotojo_id, n.egzemplioriaus_id, n.nuoma_nuo, n.nuoma_iki, s.suma, s.sumoketa "
+          "FROM nuoma n LEFT JOIN skola s ON n.skolos_id = s.id "
+          "WHERE n.id = $1::UUID AND n.grazinimo_laikas IS NULL;"}
 }};
 // clang-format on
 
@@ -98,6 +108,7 @@ class Database {
 
 	pqxx::result executeStatement(const std::string &statementName,
 								  const pqxx::params &params);
+	pqxx::result executeSql(const std::string &sql, const pqxx::params &params);
 
 	std::vector<Knyga> searchBooks(const std::string &query);
 	std::optional<Knyga> getBookById(const std::string &id);
@@ -114,6 +125,9 @@ class Database {
 	std::vector<SkolinimoIstorijosIrasas> gautiNuomosIstorija(const std::string &userId);
 
 	std::vector<SkolosDuomenysAtnaujinimui> gautiSkolasAtnaujinimui();
+
+	std::optional<AktyviosNuomosData> gautiAktyviaNuomaPagalEgzId(const std::string &egzId);
+	std::optional<AktyviosNuomosData> gautiNuomaPagalNuomosId(const std::string &nuomosId);
 };
 
 extern std::shared_ptr<Database> dbGlobalus;
