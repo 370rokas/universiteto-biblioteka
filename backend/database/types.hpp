@@ -63,4 +63,12 @@ struct AktyviosNuomosData {
 	bool skola_sumoketa;
 };
 
+struct VartotojoSkoluData {
+	std::string skola_id;
+	double suma;
+	bool sumoketa;
+	std::string nuomos_id;
+	std::string grazinimo_laikas;
+};
+
 #endif // UB_BACKEND_DATABASE_TYPES_HPP

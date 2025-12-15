@@ -2,7 +2,7 @@
 #define UB_BACKEND_DATABASE_DB_HPP
 
 #define DATABASE_POOL_SIZE 5
-#define N_SQL_STATEMENTS 15
+#define N_SQL_STATEMENTS 16
 
 #include "database/pool.hpp"
 #include "database/types.hpp"
@@ -94,7 +94,13 @@ constexpr std::array<std::pair<const char *, const char *>, N_SQL_STATEMENTS> sq
       {"gautiAktyviaSkolaPagalSkolosId",
           "SELECT n.id, n.vartotojo_id, n.egzemplioriaus_id, n.nuoma_nuo, n.nuoma_iki, s.suma, s.sumoketa "
           "FROM nuoma n LEFT JOIN skola s ON n.skolos_id = s.id "
-          "WHERE n.id = $1::UUID AND n.grazinimo_laikas IS NULL;"}
+          "WHERE n.id = $1::UUID AND n.grazinimo_laikas IS NULL;"},
+        
+          {"gautiVisasSkolasPagalVartotojoId",
+          "SELECT s.id, s.suma, s.sumoketa, n.id as nuomos_id, n.grazinimo_laikas "
+          "FROM skola s "
+          "JOIN nuoma n ON s.id = n.skolos_id "
+          "WHERE s.vartotojo_id = $1::UUID;"},
 }};
 // clang-format on
 
@@ -128,6 +134,8 @@ class Database {
 
 	std::optional<AktyviosNuomosData> gautiAktyviaNuomaPagalEgzId(const std::string &egzId);
 	std::optional<AktyviosNuomosData> gautiNuomaPagalNuomosId(const std::string &nuomosId);
+
+	std::optional<std::vector<VartotojoSkoluData>> gautiVisasSkolasPagalVartotojoId(const std::string &userId);
 };
 
 extern std::shared_ptr<Database> dbGlobalus;

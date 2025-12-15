@@ -108,6 +108,14 @@ export interface SkolinimuIstorijosIrasas {
   sumoketa: boolean;
 }
 
+export interface SkoluIstorijosIrasas {
+  skola_id: string;
+  suma: string;
+  sumoketa: boolean;
+  nuomos_id: string;
+  grazinimo_laikas: string;
+}
+
 export const session = {
   getToken: () => localStorage.getItem("authToken"),
   getRole: () => localStorage.getItem("userRole"),
@@ -139,7 +147,9 @@ export const api = {
     }),
 
   getServerInfo: (): Promise<GetServerInfoResponse> =>
-    request<GetServerInfoResponse>(""),
+    request<GetServerInfoResponse>("", {
+      method: "GET",
+    }),
 
   tokenInfo: (): Promise<TokenInfoResponse> =>
     request<TokenInfoResponse>("auth/"),
@@ -170,4 +180,7 @@ export const api = {
 
   skolinimuIstorija: (): Promise<{ ok: boolean, message?: string, istorija?: SkolinimuIstorijosIrasas[] }> =>
     request<{ ok: boolean, message?: string, istorija?: SkolinimuIstorijosIrasas[] }>("user/istorija"),
+
+  skoluIstorija: (): Promise<{ ok: boolean, message?: string, skolos?: SkoluIstorijosIrasas[] }> =>
+    request<{ ok: boolean, message?: string, skolos?: SkoluIstorijosIrasas[] }>("user/skolos"),
 };

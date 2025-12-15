@@ -71,7 +71,15 @@ export default function Dashboard() {
 
           <Button
             variant="default"
-            className="bg-[var(--primary)] hover:bg-[var(--accent)] text-[var(--destructive)]"
+            className="bg-[var(--muted)] hover:bg-[var(--muted-hover)] text-[var(--muted-foreground)]"
+            onClick={() => router.push("/user/skolos")}
+          >
+            Mano skolos
+          </Button>
+
+          <Button
+            variant="default"
+            className="bg-[var(--primary)] hover:bg-[var(--secondary)] text-[var(--destructive)]"
             onClick={() => {
               localStorage.removeItem("authToken");
               router.push("/login");

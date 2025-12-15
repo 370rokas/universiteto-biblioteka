@@ -335,3 +335,34 @@ std::optional<AktyviosNuomosData> Database::gautiNuomaPagalNuomosId(const std::s
 		return std::nullopt;
 	}
 }
+
+std::optional<std::vector<VartotojoSkoluData>> Database::gautiVisasSkolasPagalVartotojoId(const std::string &userId) {
+	try {
+		auto r = executeStatement("gautiVisasSkolasPagalVartotojoId", pqxx::params{userId});
+
+		if (r.size() == 0) {
+			return std::nullopt;
+		}
+
+		std::vector<VartotojoSkoluData> skolos;
+
+		for (const auto &row : r) {
+			VartotojoSkoluData skola;
+			skola.skola_id = row["id"].as<std::string>();
+			skola.suma = row["suma"].is_null() ? 0.0 : row["suma"].as<double>();
+			skola.sumoketa = row["sumoketa"].is_null() ? true : row["sumoketa"].as<bool>();
+			skola.nuomos_id = row["nuomos_id"].as<std::string>();
+			skola.grazinimo_laikas = row["grazinimo_laikas"].is_null() ? "" : row["grazinimo_laikas"].as<std::string>();
+
+			skolos.push_back(skola);
+		}
+
+		return skolos;
+
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko gauti visų skolų pagal vartotojo ID (userId: '{}'): {}",
+			userId, e.what());
+		return std::nullopt;
+	}
+}

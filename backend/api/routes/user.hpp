@@ -36,6 +36,40 @@ inline void setupUserRoutes(crow::App<UB_CROW_MIDDLEWARES> &app, Database *db) {
 										   {"ok", true},
 										   {"istorija", istorijaJson}});
 		});
+
+	CROW_ROUTE(app, "/user/skolos")
+		.methods(crow::HTTPMethod::GET)([&app, db](const crow::request &req) {
+			auto &ctx = app.get_context<mw::TokenAuth>(req);
+			if (!mw::IsLoggedIn(ctx)) {
+				return crow::response(401, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Unauthorized"}});
+			}
+
+			auto userId = ctx.tokenData.userId;
+
+			auto skolos = db->gautiVisasSkolasPagalVartotojoId(userId);
+
+			if (!skolos.has_value()) {
+				return crow::response(200, crow::json::wvalue{
+											   {"ok", true},
+											   {"skolos", crow::json::wvalue::list()}});
+			}
+
+			auto skolosJson = crow::json::wvalue::list();
+			for (const auto &item : skolos.value()) {
+				skolosJson.push_back(crow::json::wvalue{
+					{"skola_id", item.skola_id},
+					{"suma", item.suma},
+					{"sumoketa", item.sumoketa},
+					{"nuomos_id", item.nuomos_id},
+					{"grazinimo_laikas", item.grazinimo_laikas}});
+			};
+
+			return crow::response(200, crow::json::wvalue{
+										   {"ok", true},
+										   {"skolos", skolosJson}});
+		});
 };
 
 #endif // UB_API_ROUTES_USER_HPP
