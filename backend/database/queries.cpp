@@ -366,3 +366,52 @@ std::optional<std::vector<VartotojoSkoluData>> Database::gautiVisasSkolasPagalVa
 		return std::nullopt;
 	}
 }
+
+void Database::perskaitytiZinutes(const std::string &userId) {
+	try {
+		executeStatement("pazymetiVartotojoZinutesKaipPerskaitytas", pqxx::params{userId});
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko pažymėti vartotojo žinučių kaip perskaitytų (userId: '{}'): {}",
+			userId, e.what());
+	}
+}
+
+void Database::sukurtiZinute(const std::string &userId, const std::string &pranesimas) {
+	try {
+		executeStatement("sukurtiVartotojoZinute", pqxx::params{userId, pranesimas});
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko sukurti vartotojo žinutės (userId: '{}'): {}",
+			userId, e.what());
+	}
+}
+
+std::optional<std::vector<VartotojoZinute>> Database::gautiVartotojoZinutes(const std::string &userId) {
+	try {
+		auto r = executeStatement("gautiVartotojoZinutes", pqxx::params{userId});
+
+		if (r.size() == 0) {
+			return std::nullopt;
+		}
+
+		std::vector<VartotojoZinute> zinutes;
+
+		for (const auto &row : r) {
+			VartotojoZinute zinute;
+			zinute.id = row["id"].as<std::string>();
+			zinute.pranesimas = row["pranesimas"].as<std::string>();
+			zinute.issiuntimo_data = row["issiuntimo_data"].as<std::string>();
+
+			zinutes.push_back(zinute);
+		}
+
+		return zinutes;
+
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko gauti vartotojo žinučių (userId: '{}'): {}",
+			userId, e.what());
+		return std::nullopt;
+	}
+}

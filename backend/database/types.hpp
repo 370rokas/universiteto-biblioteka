@@ -71,4 +71,10 @@ struct VartotojoSkoluData {
 	std::string grazinimo_laikas;
 };
 
+struct VartotojoZinute {
+	std::string id;
+	std::string pranesimas;
+	std::string issiuntimo_data;
+};
+
 #endif // UB_BACKEND_DATABASE_TYPES_HPP

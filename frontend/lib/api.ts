@@ -116,6 +116,47 @@ export interface SkoluIstorijosIrasas {
   grazinimo_laikas: string;
 }
 
+export interface IsduotuKnyguStatistika {
+  dabarIsduota: number;
+  veluojamaGrazinti: number;
+}
+
+export interface PopuliariausiaKnyga {
+  id: string;
+  pavadinimas: string;
+  isdavimoKiekis: number;
+}
+
+export interface PopuliariausiosKnygos {
+  d30: PopuliariausiaKnyga[];
+  d180: PopuliariausiaKnyga[];
+}
+
+export interface AktyvusVartotojas {
+  id: string;
+  username: string;
+  isdavimuKiekis: number;
+}
+
+export interface AktyviausiVartotojai {
+  d30: AktyvusVartotojas[];
+  d180: AktyvusVartotojas[];
+}
+
+export interface StatistikosResponse {
+  ok: boolean;
+  message?: string;
+  isduotuKnyguStatistika?: IsduotuKnyguStatistika;
+  populiariausiosKnygos?: PopuliariausiosKnygos;
+  aktyviausiVartotojai?: AktyviausiVartotojai;
+}
+
+export interface VartotojoZinute {
+  id: string;
+  pranesimas: string;
+  issiuntimo_data: string;
+}
+
 export const session = {
   getToken: () => localStorage.getItem("authToken"),
   getRole: () => localStorage.getItem("userRole"),
@@ -183,4 +224,13 @@ export const api = {
 
   skoluIstorija: (): Promise<{ ok: boolean, message?: string, skolos?: SkoluIstorijosIrasas[] }> =>
     request<{ ok: boolean, message?: string, skolos?: SkoluIstorijosIrasas[] }>("user/skolos"),
+
+  gautiStatistika: (): Promise<{ ok: boolean; message?: string; statistika?: any }> =>
+    request<StatistikosResponse>("admin/statistics"),
+
+  gautiZinutes: (): Promise<{ ok: boolean; message?: string; messages?: VartotojoZinute[] }> =>
+    request<{ ok: boolean; message?: string; messages?: VartotojoZinute[] }>("user/getMessages"),
+
+  perskaitytiZinutes: (): Promise<{ ok: boolean; message?: string }> =>
+    request<{ ok: boolean; message?: string }>("user/markMessagesRead")
 };

@@ -2,7 +2,7 @@
 #define UB_BACKEND_DATABASE_DB_HPP
 
 #define DATABASE_POOL_SIZE 5
-#define N_SQL_STATEMENTS 16
+#define N_SQL_STATEMENTS 19
 
 #include "database/pool.hpp"
 #include "database/types.hpp"
@@ -21,10 +21,10 @@ constexpr std::array<std::pair<const char *, const char *>, N_SQL_STATEMENTS> sq
      "SELECT id, username, password, role, pareigos FROM vartotojai WHERE id = $1::uuid;"},
 
      {"searchBook",
-    "SELECT id, isbn, pavadinimas, autoriai, zanras, leidykla, leidimo_metai, kaina FROM knyga WHERE "
-    "paieskosVektorius @@ to_tsquery('simple', regexp_replace($1::text, '\\s+', ' & ', 'g') || ':*') "
-    "OR isbn ILIKE '%' || $1::text || '%' "
-    "ORDER BY ts_rank_cd(paieskosVektorius, to_tsquery('simple', regexp_replace($1::text, '\\s+', ' & ', 'g') || ':*')) DESC "
+    "SELECT id, isbn, pavadinimas, autoriai, zanras, leidykla, leidimo_metai, kaina FROM knyga "
+    "WHERE paieskosVektorius @@ websearch_to_tsquery('simple', $1) "
+    "OR isbn ILIKE '%' || $1 || '%' "
+    "ORDER BY ts_rank_cd(paieskosVektorius, websearch_to_tsquery('simple', $1)) DESC "
     "LIMIT 50;"},
 
     {"getBookById", 
@@ -96,11 +96,21 @@ constexpr std::array<std::pair<const char *, const char *>, N_SQL_STATEMENTS> sq
           "FROM nuoma n LEFT JOIN skola s ON n.skolos_id = s.id "
           "WHERE n.id = $1::UUID AND n.grazinimo_laikas IS NULL;"},
         
-          {"gautiVisasSkolasPagalVartotojoId",
+      {"gautiVisasSkolasPagalVartotojoId",
           "SELECT s.id, s.suma, s.sumoketa, n.id as nuomos_id, n.grazinimo_laikas "
           "FROM skola s "
           "JOIN nuoma n ON s.id = n.skolos_id "
           "WHERE s.vartotojo_id = $1::UUID;"},
+    
+      {"pazymetiVartotojoZinutesKaipPerskaitytas",
+          "UPDATE zinutes SET perskaityta = TRUE WHERE gavejo_id = $1::UUID;"},
+    
+      {"gautiVartotojoZinutes",
+          "SELECT id, pranesimas, issiuntimo_data "
+          "FROM zinutes WHERE gavejo_id = $1::UUID AND perskaityta = FALSE ORDER BY issiuntimo_data DESC;"},
+
+      {"sukurtiVartotojoZinute",
+          "INSERT INTO zinutes (gavejo_id, pranesimas, issiuntimo_data) VALUES ($1::UUID, $2::text, NOW());"}
 }};
 // clang-format on
 
@@ -136,6 +146,10 @@ class Database {
 	std::optional<AktyviosNuomosData> gautiNuomaPagalNuomosId(const std::string &nuomosId);
 
 	std::optional<std::vector<VartotojoSkoluData>> gautiVisasSkolasPagalVartotojoId(const std::string &userId);
+
+  void perskaitytiZinutes(const std::string &userId);
+  void sukurtiZinute(const std::string &userId, const std::string &pranesimas);
+  std::optional<std::vector<VartotojoZinute>> gautiVartotojoZinutes(const std::string &userId);
 };
 
 extern std::shared_ptr<Database> dbGlobalus;

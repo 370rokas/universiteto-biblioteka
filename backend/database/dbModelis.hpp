@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS pareigos (
     skolosDaugiklis NUMERIC(10, 2) NOT NULL
 );
 
-INSERT INTO pareigos (pavadinimas, skolinimoTerminas, skolosDaugiklis)
+INSERT INTO public.pareigos (pavadinimas, skolinimoTerminas, skolosDaugiklis)
 VALUES
     ('studentas', 14, 1.0),
     ('destytojas', 90, 0.5),
