@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api, Book } from "@/lib/api";
 import debounce from "lodash.debounce";
+import { Button } from "@/components/ui/button";
 
 function parseAuthors(authorsStr: string): string {
   try {
@@ -56,6 +57,10 @@ export default function BookSearch() {
 
   return (
     <div className="flex flex-col items-center bg-[var(--background)] min-h-screen p-6">
+      <Button variant="secondary" className="self-start mb-4" onClick={() => router.push("/home")}>
+        Atgal
+      </Button>
+
       <h1 className="text-3xl font-bold text-[var(--foreground)] mb-6">
         Ieškoti knygų
       </h1>

@@ -1,24 +1,27 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { api, SkoluIstorijosIrasas } from "@/lib/api";
+import { api } from "@/lib/api";
 import { useEffect, useState } from "react";
 
-export default function SkolosPage() {
-    const [data, setData] = useState<SkoluIstorijosIrasas[] | null>(null);
+export default function Rezervacijos() {
+    const [data, setData] = useState<any[] | null>(null);
     const [loading, setLoading] = useState(false);
     const a = "";
 
     useEffect(() => {
         setLoading(true);
-        api.skoluIstorija().then(response => {
-            setData(response.skolos || null);
+        api.gautiRezervacijas().then(response => {
+            console.log(response);
+            setData(response.reservations || null);
             setLoading(false);
         }).catch(error => {
-            alert("Klaida gaunant skolas:" + error.message);
+            alert("Klaida gaunant rezervacijas:" + error.message);
             setLoading(false);
         });
     }, [a]);
+
+    console.log(data);
 
     return (
         <div className="flex items-center justify-center min-h-screen text-[var(--muted-foreground)]">
@@ -29,22 +32,23 @@ export default function SkolosPage() {
                     <Button onClick={() => {
                         window.location.href = "/home";
                     }} className="mb-4">Atgal</Button>
-                    <h1 className="text-2xl font-bold mb-4">Mano skolos</h1>
+
+                    <h1 className="text-2xl font-bold mb-4">Mano rezervacijos</h1>
                     {data && data.length > 0 ? (
                         <table className="w-full table-auto border-collapse">
                             <thead>
                                 <tr>
-                                    <th className="border-b p-2 text-left">Grąžinimo laikas</th>
-                                    <th className="border-b p-2 text-left">Suma</th>
-                                    <th className="border-b p-2 text-left">Sumoketa</th>
+                                    <th className="border-b p-2 text-left">Data</th>
+                                    <th className="border-b p-2 text-left">Knyga</th>
+                                    <th className="border-b p-2 text-left">Statusas</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.map((skola) => (
-                                    <tr key={skola.skola_id}>
-                                        <td className="border-b p-2">{skola.grazinimo_laikas.length > 0 ? skola.grazinimo_laikas : "Knyga dar negražinta"}</td>
-                                        <td className="border-b p-2">{skola.suma} €</td>
-                                        <td className="border-b p-2">{skola.sumoketa ? "Taip" : "Ne"}</td>
+                                {data.map((rez) => (
+                                    <tr key={rez.id}>
+                                        <td className="border-b p-2">{rez.rezervacijosData}</td>
+                                        <td className="border-b p-2">{rez.knygosId}</td>
+                                        <td className="border-b p-2">{rez.statusas}</td>
                                     </tr>
                                 ))}
                             </tbody>

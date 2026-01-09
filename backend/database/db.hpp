@@ -2,7 +2,7 @@
 #define UB_BACKEND_DATABASE_DB_HPP
 
 #define DATABASE_POOL_SIZE 5
-#define N_SQL_STATEMENTS 19
+#define N_SQL_STATEMENTS 20
 
 #include "database/pool.hpp"
 #include "database/types.hpp"
@@ -110,7 +110,10 @@ constexpr std::array<std::pair<const char *, const char *>, N_SQL_STATEMENTS> sq
           "FROM zinutes WHERE gavejo_id = $1::UUID AND perskaityta = FALSE ORDER BY issiuntimo_data DESC;"},
 
       {"sukurtiVartotojoZinute",
-          "INSERT INTO zinutes (gavejo_id, pranesimas, issiuntimo_data) VALUES ($1::UUID, $2::text, NOW());"}
+          "INSERT INTO zinutes (gavejo_id, pranesimas, issiuntimo_data) VALUES ($1::UUID, $2::text, NOW());"},
+
+      {"gautiKnygosIdPagalEgzemplioriausId",
+          "SELECT knygos_id FROM egzempliorius WHERE id = $1::UUID;"}
 }};
 // clang-format on
 
@@ -136,6 +139,7 @@ class Database {
 
 	std::optional<std::vector<Egzempliorius>> getEgzemplioriaiByBookId(const std::string &id);
 	std::optional<Egzempliorius> getEgzemplioriusById(const std::string &id);
+  std::optional<std::string> gautiKnygosIdPagalEgzemplioriausId(const std::string &egzId);
 	bool updateEgzemplioriusStatusas(const std::string &id, const std::string &statusas);
 	bool sukurtiNuomosIrasa(const std::string &egzId, const std::string &userId);
 	std::vector<SkolinimoIstorijosIrasas> gautiNuomosIstorija(const std::string &userId);

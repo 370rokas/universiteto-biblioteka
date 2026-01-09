@@ -122,7 +122,7 @@ export default function Dashboard() {
       </Card>
 
       {messages.length > 0 && (
-        <Card className="w-[500px] bg-[var(--card)] text-[var(--card-foreground)] shadow-lg">
+        <Card className="w-[500px] bg-[var(--card)] text-[var(--card-foreground)] shadow-lg p-4 ml-4">
           <CardHeader>
             <CardTitle className="text-center text-xl">Jūsų žinutės</CardTitle>
           </CardHeader>

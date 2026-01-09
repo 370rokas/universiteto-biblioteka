@@ -415,3 +415,21 @@ std::optional<std::vector<VartotojoZinute>> Database::gautiVartotojoZinutes(cons
 		return std::nullopt;
 	}
 }
+
+std::optional<std::string> Database::gautiKnygosIdPagalEgzemplioriausId(const std::string &egzId) {
+	try {
+		auto r = dbGlobalus->executeStatement("gautiKnygosIdPagalEgzemplioriausId", pqxx::params{egzId});
+
+		if (r.size() == 0) {
+			return std::nullopt;
+		}
+
+		return r[0]["knygos_id"].as<std::string>();
+
+	} catch (const std::exception &e) {
+		logger::get()->error(
+			"Nepavyko gauti knygos ID pagal egzemplioriaus ID (egzId: '{}'): {}",
+			egzId, e.what());
+		return std::nullopt;
+	}
+}

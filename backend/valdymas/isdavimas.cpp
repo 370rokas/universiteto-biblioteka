@@ -2,6 +2,7 @@
 #include "../database/db.hpp"
 #include "utils/logger.hpp"
 #include "valdymas/skolos.hpp"
+#include "valdymas/rezervavimas.hpp"
 #include <stdexcept>
 
 IsdavimoStatusas valdymas::isduotiEgzemplioriu(const std::string &egzId, const std::string &userId) {
@@ -70,6 +71,12 @@ bool valdymas::grazintiEgzemplioriu(const std::string &nuomosId, const std::stri
 			pqxx::params{nuomosId});
 
 		dbGlobalus->updateEgzemplioriusStatusas(skola.egzemplioriaus_id, "laisva");
+
+		// Rezervaciju tikrinimas
+		auto knygosIdOpt = dbGlobalus->gautiKnygosIdPagalEgzemplioriausId(skola.egzemplioriaus_id);
+		if (knygosIdOpt.has_value()) {
+			valdymas::valdytiKnygosRezervacijuEile(knygosIdOpt.value());
+		}
 
 		return true;
 

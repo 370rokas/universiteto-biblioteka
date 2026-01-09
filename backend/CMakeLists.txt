@@ -24,6 +24,7 @@ add_executable(ub-backend
     valdymas/skolos.cpp
     valdymas/isdavimas.cpp
     valdymas/statistika.cpp
+    valdymas/rezervavimas.cpp
 
     utils/config.cpp
 )

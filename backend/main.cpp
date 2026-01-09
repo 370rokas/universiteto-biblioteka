@@ -6,6 +6,7 @@
 #include <atomic>
 #include <csignal>
 #include <cstdint>
+#include <thread>
 
 std::atomic<bool> running(true);
 
@@ -30,19 +31,20 @@ int main() {
 
 	while (running) {
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		runtime++;
-
+		
 		if (!api.isRunning()) {
 			logger::get()->warn("API nustojo veikti. Išjungiama.");
 			running = false;
 		}
-
+		
 		// Kas valanda:
 		if (runtime % 3600 == 0) {
 			valdymas::atnaujintiSkolas();
-
+			
 			runtime = 0;
 		}
+		
+		runtime++;
 	}
 
 	api.stop();

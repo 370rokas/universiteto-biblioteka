@@ -1,6 +1,7 @@
 #ifndef UB_API_ROUTES_USER_HPP
 #define UB_API_ROUTES_USER_HPP
 
+#include "valdymas/rezervavimas.hpp"
 #include "api/middlewares.hpp"
 #include "database/db.hpp"
 
@@ -119,6 +120,41 @@ inline void setupUserRoutes(crow::App<UB_CROW_MIDDLEWARES> &app, Database *db) {
 			return crow::response(200, crow::json::wvalue{
 										   {"ok", true},
 										   {"message", "All messages marked as read"}});
+		});
+
+	CROW_ROUTE(app, "/user/reservations")
+		.methods(crow::HTTPMethod::GET)([&app, db](const crow::request &req) {
+			auto &ctx = app.get_context<mw::TokenAuth>(req);
+			if (!mw::IsLoggedIn(ctx)) {
+				return crow::response(401, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Unauthorized"}});
+			}
+
+			auto userId = ctx.tokenData.userId;
+
+			auto reservations = valdymas::gautiVartotojoRezervacijas(userId);
+			logger::get()->info("Gautos vartotojo ('{}') rezervacijos: {}", userId, reservations.size());
+
+			if (reservations.empty()) {
+				return crow::response(200, crow::json::wvalue{
+											   {"ok", true},
+											   {"reservations", crow::json::wvalue::list()}});
+			}
+
+			auto reservationsJson = crow::json::wvalue::list();
+			for (const auto &item : reservations) {
+				reservationsJson.push_back(crow::json::wvalue{
+					{"id", item.id},
+					{"knygosId", item.knygosId},
+					{"vartotojoId", item.vartotojoId},
+					{"rezervacijosData", item.rezervacijosData},
+					{"statusas", item.statusas}});
+			};
+
+			return crow::response(200, crow::json::wvalue{
+										   {"ok", true},
+										   {"reservations", reservationsJson}});
 		});
 };
 

@@ -209,11 +209,6 @@ export const api = {
       method: "POST",
     }),
 
-  rezervuotiEgzemplioriu: (egzemplioriusId: string): Promise<{ ok: boolean; message?: string }> =>
-    request<{ ok: boolean; message?: string }>(`books/egzempliorius/${egzemplioriusId}/reserve`, {
-      method: "POST",
-    }),
-
   grazintiEgzemplioriu: (egzemplioriusId: string): Promise<{ ok: boolean; message?: string }> =>
     request<{ ok: boolean; message?: string }>(`books/egzempliorius/${egzemplioriusId}/return`, {
       method: "POST",
@@ -232,5 +227,13 @@ export const api = {
     request<{ ok: boolean; message?: string; messages?: VartotojoZinute[] }>("user/getMessages"),
 
   perskaitytiZinutes: (): Promise<{ ok: boolean; message?: string }> =>
-    request<{ ok: boolean; message?: string }>("user/markMessagesRead")
+    request<{ ok: boolean; message?: string }>("user/markMessagesRead"),
+
+  gautiRezervacijas: (): Promise<{ ok: boolean; message?: string; reservations?: any[] }> =>
+    request<{ ok: boolean; message?: string; rezervacijos?: any[] }>("user/reservations"),
+
+  rezervuotiKnyga: (knygosId: string): Promise<{ ok: boolean; message?: string }> =>
+    request<{ ok: boolean; message?: string }>(`books/${knygosId}/reserve`, {
+      method: "POST",
+    }),
 };

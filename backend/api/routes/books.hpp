@@ -4,6 +4,7 @@
 #include "api/middlewares.hpp"
 #include "database/db.hpp"
 #include "valdymas/isdavimas.hpp"
+#include "valdymas/rezervavimas.hpp"
 
 inline void setupBooksRoutes(crow::App<UB_CROW_MIDDLEWARES> &app, Database *db) {
 
@@ -199,6 +200,31 @@ inline void setupBooksRoutes(crow::App<UB_CROW_MIDDLEWARES> &app, Database *db) 
 				return crow::response(400, crow::json::wvalue{
 											   {"ok", false},
 											   {"message", "Egzemplioriaus grąžinimas nepavyko"}});
+			}
+		});
+
+	// Rezervuoti knyga
+	CROW_ROUTE(app, "/books/<string>/reserve")
+		.methods(crow::HTTPMethod::POST)([&app, db](const crow::request &req, const std::string &knygosId) {
+			auto &ctx = app.get_context<mw::TokenAuth>(req);
+			if (!mw::IsLoggedIn(ctx)) {
+				return crow::response(401, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Unauthorized"}});
+			}
+
+			auto userId = ctx.tokenData.userId;
+
+			auto pavyko = valdymas::rezervuotiKnyga(userId, knygosId);
+
+			if (pavyko) {
+				return crow::response(200, crow::json::wvalue{
+											   {"ok", true},
+											   {"message", "Knyga sėkmingai rezervuota"}});
+			} else {
+				return crow::response(400, crow::json::wvalue{
+											   {"ok", false},
+											   {"message", "Knygos rezervacija nepavyko"}});
 			}
 		});
 }

@@ -87,6 +87,10 @@ export default function IstorijaPage() {
 
     return (
         <div className="max-w-8xl mx-auto p-6 rounded-lg shadow">
+            <Button onClick={() => {
+                window.location.href = "/home";
+            }} className="mb-4">Atgal</Button>
+
             <h1 className="mb-6 text-3xl font-bold text-gray-200">
                 Skolinimų istorija
             </h1>

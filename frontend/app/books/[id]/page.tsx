@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api, Book, Egzempliorius } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 
 export default function BookDetail() {
   const router = useRouter();
@@ -113,6 +114,21 @@ export default function BookDetail() {
           <p>
             <strong>Kaina:</strong> {book.kaina} €
           </p>
+
+          <Button onClick={() => {
+            api
+              .rezervuotiKnyga(book.id)
+              .then((resp) => {
+                alert("Knyga sėkmingai rezervuota!");
+                router.push(`/user/rezervacijos`);
+              })
+              .catch((err) => {
+                alert(`Klaida: ${err.message}`);
+                router.refresh();
+              });
+          }}>
+            Rezervuoti knygą
+          </Button>
         </CardContent>
       </Card>
 
@@ -161,20 +177,7 @@ export default function BookDetail() {
                       Skolintis
                     </button>
                   ) : (
-                    <button
-                      className="px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] rounded hover:bg-[var(--primary-hover)]"
-                      onClick={() =>
-                        api.rezervuotiEgzemplioriu(egzempliorius.id).then((resp) => {
-                          alert("Knyga sėkmingai rezervuota!");
-                          router.push(`/user/rezervacijos`);
-                        }).catch((err) => {
-                          alert(`Klaida: ${err.message}`);
-                          router.refresh();
-                        })
-                      }
-                    >
-                      Rezervuoti
-                    </button>
+                    <p>Užimta</p>
                   )}
                 </div>
               </div>
