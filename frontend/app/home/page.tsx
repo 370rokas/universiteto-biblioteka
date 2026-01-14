@@ -98,16 +98,6 @@ export default function Dashboard() {
             </Button>
           )}
 
-          {userInfo?.user.role === "administratorius" && (
-            <Button
-              variant="default"
-              className="bg-[var(--primary)] hover:bg-[var(--secondary)] text-[var(--primary-foreground)]"
-              onClick={() => router.push("/manage")}
-            >
-              Knygu valdymas
-            </Button>
-          )}
-
           <Button
             variant="default"
             className="bg-[var(--destructive)] hover:bg-[var(--destructive-hover)] text-[var(--destructive-foreground)]"
