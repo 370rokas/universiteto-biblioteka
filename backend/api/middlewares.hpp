@@ -4,8 +4,9 @@
 #include "utils/tokens.hpp"
 
 #include <crow.h>
+#include <crow/middlewares/cors.h>
 
-#define UB_CROW_MIDDLEWARES mw::LoggerMW, mw::TokenAuth
+#define UB_CROW_MIDDLEWARES mw::LoggerMW, mw::TokenAuth, crow::CORSHandler
 
 namespace mw {
 

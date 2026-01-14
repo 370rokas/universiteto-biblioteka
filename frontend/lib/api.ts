@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:2233/";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://ub-api.morkunas.dev/";
 
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
